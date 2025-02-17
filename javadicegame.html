@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hi-Lo Dice Game</title>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .game-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    .dices {
+      display: flex;
+      gap: 10px;
+      font-size: 2rem;
+    }
+    .dice {
+      display: inline-block;
+      animation: spinDice 1s ease;
+    }
+    @keyframes spinDice {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(180deg); }
+      50% { transform: rotate(360deg); }
+      75% { transform: rotate(540deg); }
+      100% { transform: rotate(720deg); }
+    }
+    .dice2 {
+      display: inline-block;
+      animation: spinDice2 1s ease;
+    }
+    @keyframes spinDice2 {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(720deg); }
+      100% { transform: rotate(1080deg); }
+    }
+    .dice3 {
+      display: inline-block;
+      animation: spinDice3 1s ease;
+    }
+    @keyframes spinDice3 {
+      0% { transform: rotate(0deg); }
+      33% { transform: rotate(360deg); }
+      66% { transform: rotate(720deg); }
+      100% { transform: rotate(1080deg); }
+    }
+    input, select, button {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      margin: 5px;
+    }
+    button {
+      background-color: #a9a9a9;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #808080;
+    }
+    .result, .balance {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    .jackpot {
+      font-size: 2rem;
+      color: #e44d26;
+      animation: pop 0.5s ease;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.5); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Hi-Lo Dice Game</h1>
+  <div class="game-container">
+    <div>
+      <input type="number" id="initialBalance" placeholder="Enter initial balance" min="1" />
+      <button onclick="setBalance()">Set Balance</button>
+    </div>
+    <div class="balance" id="balance">Balance: $0</div>
+    <div>
+      <input type="number" id="betAmount" placeholder="Enter your bet" min="1" />
+      <select id="betType">
+        <option value="high">High (&ge;12)</option>
+        <option value="mid">Mid (=11)</option>
+        <option value="low">Low (&le;10)</option>
+      </select>
+      <button onclick="rollDice()">Roll Dice</button>
+    </div>
+    <div class="dices" id="dices">
+      <div class="dice">🎲</div>
+      <div class="dice2">🎲</div>
+      <div class="dice3">🎲</div>
+    </div>
+    <div class="result" id="result"></div>
+    <div id="celebration" style="display:none; font-size:2rem; color:gold;">🎉🎊 Jackpot! 🎊🎉</div>
+  </div>
+
+  <script>
+    let balance = 0;
+
+    function setBalance() {
+      const initial = parseInt(document.getElementById('initialBalance').value);
+      if (isNaN(initial) || initial <= 0) {
+        alert('Please enter a valid initial balance');
+        return;
+      }
+      balance = initial;
+      document.getElementById('balance').textContent = `Balance: $${balance}`;
+    }
+
+    function rollDice() {
+      const betAmount = parseInt(document.getElementById('betAmount').value);
+      const betType = document.getElementById('betType').value;
+      if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
+        alert('Invalid bet amount');
+        return;
+      }
+
+      // Trigger dice roll animation
+      const diceElements = document.querySelectorAll('.dice, .dice2, .dice3');
+      diceElements.forEach(dice => {
+        dice.style.animation = 'none';  // Reset the animation
+        dice.offsetHeight;  // Trigger reflow to reset the animation
+        if (dice.classList.contains('dice')) {
+          dice.style.animation = 'spinDice 1s ease';
+        } else if (dice.classList.contains('dice2')) {
+          dice.style.animation = 'spinDice2 1s ease';
+        } else if (dice.classList.contains('dice3')) {
+          dice.style.animation = 'spinDice3 1s ease';
+        }
+      });
+
+      // Random dice values
+      const dice1 = Math.floor(Math.random() * 6) + 1;
+      const dice2 = Math.floor(Math.random() * 6) + 1;
+      const dice3 = Math.floor(Math.random() * 6) + 1;
+      const sum = dice1 + dice2 + dice3;
+
+      setTimeout(() => {
+        document.querySelector('.dice').textContent = `🎲 ${dice1}`;
+        document.querySelector('.dice2').textContent = `🎲 ${dice2}`;
+        document.querySelector('.dice3').textContent = `🎲 ${dice3}`;
+      }, 1000); // Update dice faces after the animation completes
+
+      let result = '';
+      let reward = 0;
+      document.getElementById('celebration').style.display = 'none';
+
+      if ((betType === 'high' && sum >= 12) || (betType === 'low' && sum <= 10)) {
+        reward = betAmount * 2;
+        balance += reward - betAmount;
+        result = `You won! Reward: $${reward}`;
+      } else if (betType === 'mid' && sum === 11) {
+        reward = betAmount * 5;
+        balance += reward - betAmount;
+        result = `Jackpot! You won 5x! Reward: $${reward}`;
+        document.getElementById('celebration').style.display = 'block';
+      } else {
+        balance -= betAmount;
+        result = 'You lost! Try again!';
+      }
+      document.getElementById('balance').textContent = `Balance: $${balance}`;
+      document.getElementById('result').textContent = `Dice sum: ${sum}. ${result}`;
+    }
+  </script>
+</body>
+</html>
