@@ -3,7 +3,7 @@
 This is a simple Hi-Lo Dice Game implemented using HTML, CSS, and JavaScript.
 
 ## javadicegame.html file
-Updates: JavaScript assigns a specific animation to each dice element when the dice are rolled, creating a more dynamic and realistic rolling effect.
+Updates: Aassigns a specific animation to each dice element when the dice are rolled, creating a more rolling dynamic.
 
 ## Features
 1. **Initial Balance Input**: Players can set their initial balance.
